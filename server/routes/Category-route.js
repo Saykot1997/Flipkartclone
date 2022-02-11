@@ -6,6 +6,7 @@ const adminMiddleWire = require('../authgurd/addminmiddlewere');
 const { upload } = require("../controles/FileUpload");
 const Page = require("../models/Page-model");
 const Product = require("../models/Products-model");
+const fs = require("fs");
 
 // category create
 Router.post('/category/create', authGurd, adminMiddleWire, upload.single('files'), async (req, res) => {  //
@@ -147,6 +148,7 @@ Router.post('/category/update', upload.array('files'), async (req, res) => {
                 name: name,
                 type: type
             }
+
             if (parentId !== "") {
                 category.parentId = parentId
             }
@@ -155,13 +157,10 @@ Router.post('/category/update', upload.array('files'), async (req, res) => {
             res.status(200).json(updatedCategory);
         }
 
-
     } catch (error) {
 
         res.status(400).json("could not update")
     }
-
-
 });
 
 
@@ -178,6 +177,57 @@ Router.post('/category/delete', async (req, res) => {
         for (let id of ids) {
 
             const deletedId = await Category.findOneAndDelete({ _id: id._id });
+            const page = await Page.find({ category: id._id });
+            const products = await Product.find({ category: id._id });
+
+            if (page[0].banners.length > 0) {
+
+                page[0].banners.forEach((banner) => {
+
+                    const oldPhoto = banner.img;
+                    const uploadDir = "uploads/";
+                    const oldPhotoWithPath = uploadDir + oldPhoto
+
+                    if (oldPhoto) {
+
+                        if (fs.existsSync(oldPhotoWithPath)) {
+
+                            fs.unlink(oldPhotoWithPath, (err) => {
+                                console.log("banner photo deleted");
+                            });
+                        }
+
+                    } else {
+
+                        console.log("oldPhoto is not exist");
+                    }
+                });
+            }
+
+            if (products[0].productPicture.length > 0) {
+
+                products[0].productPicture.forEach((productPicture) => {
+
+                    const oldPhoto = productPicture.img;
+                    const uploadDir = "uploads/";
+                    const oldPhotoWithPath = uploadDir + oldPhoto
+
+                    if (oldPhoto) {
+
+                        if (fs.existsSync(oldPhotoWithPath)) {
+
+                            fs.unlink(oldPhotoWithPath, (err) => {
+                                console.log("product photo deleted");
+                            });
+                        }
+
+                    } else {
+
+                        console.log("oldPhoto is not exist");
+                    }
+                });
+            }
+
             await Page.deleteMany({ category: id._id });
             await Product.deleteMany({ category: id._id });
             deletedIds.push(deletedId);

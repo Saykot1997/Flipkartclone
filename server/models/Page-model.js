@@ -17,12 +17,6 @@ const pageSchema = new mongoose.Schema({
             navigateto: { type: String },
         }
     ],
-    products: [
-        {
-            img: { type: String },
-            navigateto: { type: String },
-        }
-    ],
     type: {
         type: String
     },

@@ -73,8 +73,11 @@ Router.put('/admin/orders/:orderId', authGurd, async (req, res) => { //
     const { orderStatus } = req.body;
 
     if (orderStatus[0].type === "delevered") {
+
         orderStatus[0].isComplete = true
+
     } else {
+
         orderStatus[0].isComplete = false
     }
 

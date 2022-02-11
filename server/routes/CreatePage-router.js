@@ -4,25 +4,18 @@ const { upload } = require("../controles/FileUpload");
 const Page = require("../models/Page-model");
 const authGurd = require('../authgurd/authGurd');
 const adminmiddlewere = require('../authgurd/addminmiddlewere');
+const fs = require('fs');
 
 //create page
 Router.post("/page/create", authGurd, adminmiddlewere, upload.fields([{ name: "banners" }, { name: "products" }]), async (req, res) => {
 
-    const { banners, products } = req.files;
+    const { banners } = req.files;
 
     if (banners.length > 0) {
 
         req.body.banners = banners.map((banner) => ({
             img: banner.filename,
             navigateto: `/bannerClicked?categoryId=${req.body.category}&type=${req.body.type}`
-        }))
-    }
-
-    if (products.length > 0) {
-
-        req.body.products = banners.map((product) => ({
-            img: product.filename,
-            navigateto: `/productClicked?categoryId=${req.body.category}&type=${req.body.type}`
         }))
     }
 
@@ -64,6 +57,33 @@ Router.post("/page/create", authGurd, adminmiddlewere, upload.fields([{ name: "b
 Router.delete("/page/delete/:id", authGurd, adminmiddlewere, async (req, res) => {
 
     try {
+
+        const page = await Page.findById(req.params.id);
+
+        if (page.banners.length > 0) {
+
+            page.banners.forEach((banner) => {
+
+                const oldPhoto = banner.img;
+                const uploadDir = "uploads/";
+                const oldPhotoWithPath = uploadDir + oldPhoto
+
+                if (oldPhoto) {
+
+                    if (fs.existsSync(oldPhotoWithPath)) {
+
+                        fs.unlink(oldPhotoWithPath, (err) => {
+                            console.log("banner photo deleted");
+                        });
+                    }
+
+                } else {
+
+                    console.log("oldPhoto is not exist");
+                }
+            });
+        }
+
 
         await Page.findOneAndDelete({ _id: req.params.id });
         const pages = await Page.find({}).populate("category")
