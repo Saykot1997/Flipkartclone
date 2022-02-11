@@ -13,13 +13,13 @@ export default function ProductType() {
     const [filterAbleProduct, setFilterAbleProduct] = useState(null);
     const PF = Host + "/"
     const { productDispatch } = useContext(productContext)
-    const path = useLocation().pathname;
+    const path = useLocation().pathname.split('/')[1];
 
     useEffect(() => {
 
         const getProduct = async () => {
 
-            const res = await axios.get(`${Host}/products/${path}`);
+            const res = await axios.get(`${Host}/api/products/${path}`);
 
             if (Array.isArray(res.data)) {
 

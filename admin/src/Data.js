@@ -1,2 +1,2 @@
-export const HOST = 'http://localhost:8000';
+export const HOST = 'http://localhost:5000';
 // export const HOST = '';

@@ -1,6 +1,6 @@
 const express = require('express');
-const cors = require('cors');
 const app = express();
+const cors = require('cors');
 const mongoose = require('mongoose');
 const env = require("dotenv");
 const userRouter = require('./routes/user-router');
@@ -12,15 +12,15 @@ const pageRoute = require("./routes/CreatePage-router");
 const orderRoute = require("./routes/Order-router");
 const addressRoute = require("./routes/Address-router");
 
-// corse
-app.use(cors());
-
 //enviroment variables setup
 env.config();
 
+// corse
+app.use(cors());
+
 //json data purse
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }))
+app.use(express.urlencoded({ extended: false }));
 app.use(express.static('uploads'));
 
 // databess conection
@@ -39,4 +39,13 @@ app.use('/api', pageRoute);
 app.use('/api', addressRoute);
 app.use('/api', orderRoute);
 
-app.listen(process.env.PORT, () => { console.log(`server is running at : ${process.env.PORT}`) });
+
+// port number
+
+const PORT = process.env.PORT || 5000;
+
+// app host port
+
+app.listen(PORT, () => {
+    console.log("server is running");
+})

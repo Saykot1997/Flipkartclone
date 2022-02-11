@@ -18,6 +18,9 @@ export default function BrandProduct() {
     const PF = Host + "/"
     const path = useLocation().pathname.split('/')[2];
 
+    console.log(useLocation().pathname.split('/'));
+    console.log(path);
+
     const getProduct = async () => {
 
         const res = await axios.get(`${Host}/api/products/${path}`);
