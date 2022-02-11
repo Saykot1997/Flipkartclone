@@ -18,7 +18,6 @@ function PageCreate() {
     const [open, setOpen] = useState(false);
     const [type, setType] = useState("");
     const [bannerImg, setBannerImg] = useState([]);
-    const [productImg, setProductImg] = useState([]);
     const [pages, setPages] = useState(null);
 
     useEffect(() => {
@@ -75,7 +74,7 @@ function PageCreate() {
 
     const submitForm = async () => {
 
-        if (pageName && pageDesc && parentId && bannerImg.length > 0 && productImg.length > 0) {
+        if (pageName && pageDesc && parentId && bannerImg.length > 0) {
 
             const form = new FormData();
             form.append("title", pageName);
@@ -85,10 +84,6 @@ function PageCreate() {
 
             bannerImg.forEach((item) => {
                 form.append("banners", item)
-            });
-
-            productImg.forEach((item) => {
-                form.append("products", item)
             });
 
             const res = await axios.post(`${HOST}/api/page/create`, form, {
@@ -104,8 +99,6 @@ function PageCreate() {
             setParentId("");
             setType("");
             setBannerImg([]);
-            setProductImg([]);
-
 
         } else {
 
@@ -169,15 +162,6 @@ function PageCreate() {
                                     </div> : null
                             }
                             <Input type="file" file onChange={(e) => { setBannerImg([...bannerImg, e.target.files[0]]) }} />
-                            {
-                                productImg ?
-                                    <div>
-                                        {productImg.map((item, index) => (
-                                            <p key={index}>{item.name}</p>
-                                        ))}
-                                    </div> : null
-                            }
-                            <Input type="file" file onChange={(e) => { setProductImg([...productImg, e.target.files[0]]) }} />
                         </InputField>
                         <SubmitField>
                             <AddCatButton onClick={submitForm} >Create Page</AddCatButton>
@@ -211,7 +195,6 @@ function PageCreate() {
                                     <div >
                                         <Title>Actions</Title>
                                         <ActionBox>
-                                            <button >Eddite</button>
                                             <button onClick={() => DeletePage(page._id)}>Delete</button>
                                         </ActionBox>
                                     </div>
