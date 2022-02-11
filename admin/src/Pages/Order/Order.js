@@ -5,33 +5,66 @@ import { useContext, useEffect, useState } from "react";
 import axios from "axios"
 import { OrdersContext } from "../../Context/Order Context/OrdersContextProvider";
 import Ordersactions from "../../Context/Order Context/Orders.actions";
+import { HOST } from "../../Data";
+import { authContext } from "../../Context/Admin Context/ContextProvider";
 
 function Order() {
 
+    const { user } = useContext(authContext)
     const { Orders, OrdersDispatch } = useContext(OrdersContext);
     const [orderStatus, setOrderStatus] = useState('');
 
     useEffect(() => {
 
         const grtOrders = async () => {
-            const res = await axios.get("/admin/orders");
+
+            const res = await axios.get(`${HOST}/api/admin/orders`, {
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
+            });
+
             OrdersDispatch({ type: Ordersactions.Feaching_success, payload: res.data })
         }
-        grtOrders()
+
+        grtOrders();
+
     }, [])
 
     const changeOrderStatus = async (order) => {
 
-        const neworderStatus = [{ ...order.orderStatus[0], type: orderStatus }]
+        if (orderStatus === '') {
 
-        const res = await axios.put(`/admin/orders/${order._id}`, { orderStatus: neworderStatus })
-        if (res.status === 200) {
-            const res = await axios.get("/admin/orders");
-            OrdersDispatch({ type: Ordersactions.Feaching_success, payload: res.data })
-            setOrderStatus("")
+            window.alert("Please select order status");
+
+        } else {
+
+
+            const neworderStatus = [{ ...order.orderStatus[0], type: orderStatus }]
+
+            const res = await axios.put(`${HOST}/api/admin/orders/${order._id}`, { orderStatus: neworderStatus }, {
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
+            })
+
+            if (res.status === 200) {
+
+                const res = await axios.get(`${HOST}/api/admin/orders`, {
+                    headers: {
+                        "Authorization": `Bearer ${user.token}`
+                    }
+                });
+
+                OrdersDispatch({ type: Ordersactions.Feaching_success, payload: res.data });
+                setOrderStatus("")
+            }
         }
 
+
     }
+
+    console.log(Orders);
 
     return (
         <Wraper>
@@ -46,7 +79,7 @@ function Order() {
                                 order.items.map(item =>
                                     <OrderItem>
                                         <OdrerImg>
-                                            <img src={`http://localhost:8000/${item.productId.productPicture[0].img}`} />
+                                            <img src={`${HOST}/${item.productId.productPicture[0].img}`} alt="" />
                                         </OdrerImg>
                                         <Section>
                                             <P>Product Name</P>
@@ -71,14 +104,22 @@ function Order() {
                                         <Section>
                                             <P>Order Type</P>
                                             <p>{order.orderStatus[0].type}</p>
-                                            <ChangeStatus onChange={(e) => setOrderStatus(e.target.value)}>
-                                                <option >Change Status</option>
-                                                <option value="ordered">Ordered</option>
-                                                <option value="packed">Packed</option>
-                                                <option value="shipped">Shipped</option>
-                                                <option value="delevered">Delevered</option>
-                                            </ChangeStatus>
-                                            <ChangeStatusBTN onClick={() => { changeOrderStatus(order) }}>Save Change</ChangeStatusBTN>
+
+                                            {
+                                                order.orderStatus[0].isComplete === false &&
+
+                                                <div>
+                                                    <ChangeStatus value={orderStatus} onChange={(e) => setOrderStatus(e.target.value)}>
+                                                        <option >Change Status</option>
+                                                        <option value="ordered">Ordered</option>
+                                                        <option value="packed">Packed</option>
+                                                        <option value="shipped">Shipped</option>
+                                                        <option value="delevered">Delevered</option>
+                                                    </ChangeStatus>
+                                                    <ChangeStatusBTN onClick={() => { changeOrderStatus(order) }}>Save Change</ChangeStatusBTN>
+                                                </div>
+                                            }
+
                                         </Section>
 
                                     </OrderItem>

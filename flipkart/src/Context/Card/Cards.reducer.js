@@ -41,7 +41,6 @@ const Reducer = (state, action) => {
                 Cards: [...newCards]
             };
 
-
         case Cardsactions.Reset:
             return {
                 Cards: action.payload

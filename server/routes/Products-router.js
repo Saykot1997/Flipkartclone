@@ -4,44 +4,13 @@ const Product = require('../models/Products-model');
 const Category = require("../models/Category-model")
 const authGurd = require('../authgurd/authGurd');
 const adminMiddleWire = require('../authgurd/addminmiddlewere');
+const fs = require('fs');
+const { upload } = require("../controles/FileUpload");
 
-// image upload require functions
-
-const multer = require('multer');
-const path = require('path');
-
-// multer images upload
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(path.dirname(__dirname), "uploads"))
-    },
-
-    filename: (req, file, cb) => {
-        cb(null, file.fieldname + "-" + Date.now() + "-" + file.originalname)
-    }
-})
-
-const upload = multer({
-    storage: storage
-
-    , fileFilter: (req, file, cb) => {
-        if (
-            file.mimetype === "image/jpg" ||
-            file.mimetype === "image/jpeg" ||
-            file.mimetype === "image/png"
-        ) {
-            cb(null, true)
-        } else {
-            cb(new Error("only jpg,jpeg and png are alowed."))
-        }
-
-    }
-})
 
 // create product 
 
-Router.post('/product/create', authGurd, adminMiddleWire, upload.array('files'), async (req, res) => {   // authGurd, adminMiddleWire,
+Router.post('/product/create', authGurd, adminMiddleWire, upload.array('files'), async (req, res) => {
 
     const { name, price, description, category, quantity } = req.body;
 
@@ -55,6 +24,7 @@ Router.post('/product/create', authGurd, adminMiddleWire, upload.array('files'),
     }
 
     try {
+
         const product = await new Product({
             name,
             slug: name.split(" ").join("-"),
@@ -70,6 +40,7 @@ Router.post('/product/create', authGurd, adminMiddleWire, upload.array('files'),
         res.status(200).json(updateProduct);
 
     } catch (error) {
+
         res.status(400).json(error);
     }
 });
@@ -78,18 +49,17 @@ Router.post('/product/create', authGurd, adminMiddleWire, upload.array('files'),
 // Get Products
 
 Router.get("/products", async (req, res) => {
+
     try {
 
         const products = await Product.find({}).populate('category');
         res.status(200).json(products);
 
     } catch (error) {
+
         res.status(400).json("could not fatch data");
     }
-
-
 })
-
 
 // update product 
 
@@ -100,6 +70,30 @@ Router.put('/product/update/:productId', authGurd, adminMiddleWire, upload.array
     let productPicture = [];
 
     if (req.files.length > 0) {
+
+        const product = await Product.findById(productId);
+
+        product.productPicture.map((img) => {
+
+            const oldPhoto = img.img;
+            const uploadDir = "uploads/";
+            const oldPhotoWithPath = uploadDir + oldPhoto
+
+            if (oldPhoto) {
+
+                if (fs.existsSync(oldPhotoWithPath)) {
+
+                    fs.unlink(oldPhotoWithPath, (err) => {
+                        console.log("file deleted");
+                    });
+                }
+
+            } else {
+
+                console.log("oldPhoto is not exist");
+            }
+
+        });
 
         productPicture = req.files.map((file) => {
             return { img: file.filename }
@@ -119,18 +113,16 @@ Router.put('/product/update/:productId', authGurd, adminMiddleWire, upload.array
                 }
             }, { new: true })
 
-            res.status(200).json(updateProduct)
+            res.status(200).json(updateProduct);
 
         } catch (error) {
+
             res.status(400).json(error);
         }
 
     } else {
 
         try {
-
-            const findProduct = await Product.findOne({ _id: productId })
-            console.log(findProduct)
 
             const updateProduct = await Product.findOneAndUpdate({ _id: productId }, {
                 $set: {
@@ -140,30 +132,37 @@ Router.put('/product/update/:productId', authGurd, adminMiddleWire, upload.array
                     quantity,
                     category
                 }
-            }, { new: true })
+            }, { new: true });
 
-            res.status(200).json(updateProduct)
+            res.status(200).json(updateProduct);
 
         } catch (error) {
+
             res.status(400).json(error);
         }
     }
-
-
 });
 
 
 // get product by category
+
 Router.get("/products/:slug", async (req, res) => {
+
     try {
+
         const slug = req.params.slug
         const category = await Category.findOne({ slug: slug }).select("_id type");
+
         if (category) {
+
             const products = await Product.find({ category: category._id });
 
             if (category.type !== "store") {
-                res.status(200).json(products)
+
+                res.status(200).json(products);
+
             } else {
+
                 res.status(200).json({
                     products,
                     productByPrice: {
@@ -177,12 +176,13 @@ Router.get("/products/:slug", async (req, res) => {
                 });
             }
 
-
         } else {
+
             res.status(400).json('Category is not available');
         }
 
     } catch (error) {
+
         res.status(400).json("could not fatch data");
     }
 
@@ -194,6 +194,7 @@ Router.get("/products/:slug", async (req, res) => {
 Router.get("/product/:productId", async (req, res) => {
 
     try {
+
         const product = await Product.findById(req.params.productId).populate("category");
 
         const parentCategories = []
@@ -204,8 +205,9 @@ Router.get("/product/:productId", async (req, res) => {
             parentCategory && parentCategories.push(parentCategory);
 
             if (parentCategory) {
+
                 const superparentCategory = await Category.findById(parentCategory.parentId);
-                superparentCategory && parentCategories.push(superparentCategory);
+                parentCategories.push(superparentCategory);
             }
 
         }
@@ -213,7 +215,8 @@ Router.get("/product/:productId", async (req, res) => {
         res.status(200).json({ product, parentCategories });
 
     } catch (error) {
-        res.status(400).json(error);
+
+        res.status(500).json(error);
     }
 
 
@@ -225,10 +228,39 @@ Router.get("/product/:productId", async (req, res) => {
 Router.delete("/product/delete/:productId", authGurd, adminMiddleWire, async (req, res) => {
 
     const param = req.params.productId
+
     try {
-        const product = await Product.findOneAndDelete({ _id: param });
-        product && res.status(200).json("product deleted")
+
+        const product = await Product.findById(param);
+
+        product.productPicture.map((img) => {
+
+            const oldPhoto = img.img;
+            const uploadDir = "uploads/";
+            const oldPhotoWithPath = uploadDir + oldPhoto
+
+            if (oldPhoto) {
+
+                if (fs.existsSync(oldPhotoWithPath)) {
+
+                    fs.unlink(oldPhotoWithPath, (err) => {
+                        console.log("file deleted");
+                    });
+                }
+
+            } else {
+
+                console.log("oldPhoto is not exist");
+            }
+
+        })
+
+        await Product.deleteOne({ _id: param });
+        res.status(200).json("product deleted");
+
     } catch (error) {
+
+        console.log(error);
         res.status(400).json(error)
     }
 

@@ -8,25 +8,22 @@ import ProductList from "./Pages/Product/ProductList/ProductList";
 import ProductDetails from "./Pages/Product/ProductDeatils/ProductDetails";
 import Card from "./Pages/Card/Card";
 import Checkout from "./Pages/Checkout/Checkout";
-import { CardsContext } from "./Context/Card/CardsContextProvider";
 import Order from "./Pages/Order/Order";
 import BrandProduct from "./Pages/Product/ProductList/BrandProduct";
+import { Host } from "./data"
 
 
 function App() {
 
   const { dispatch } = useContext(categoryContext);
-  const { Cards, Cardsdispatch } = useContext(CardsContext);
-
 
   useEffect(() => {
 
-    //category data fatch
     const getCategory = async () => {
 
       try {
 
-        const res = await axios.get("/categories")
+        const res = await axios.get(`${Host}/api/categories`);
         res && dispatch({ type: Categoryactions.Feaching_success, payload: res.data });
 
       } catch (error) {

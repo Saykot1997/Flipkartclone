@@ -1,14 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { Wraper, Heading, Title, Button, Card, CardItem, Photo, Price, Reating, Img, Deatails, Name } from "./ProductList.style"
-import { useHistory, useLocation } from 'react-router'
+import { useLocation } from 'react-router'
 import axios from 'axios';
 import { productContext } from '../../../Context/Product context/ProductContextProvider';
 import Productactions from '../../../Context/Product context/Product.actions';
 import { Link } from 'react-router-dom';
+import { Host } from '../../../data';
 
 export default function Productstore() {
 
-    const PF = "http://localhost:8000/"
+    const PF = Host + "/"
     const { products, productDispatch } = useContext(productContext)
     const path = useLocation().pathname;
     const category = path.split("/")[1];
@@ -17,19 +18,25 @@ export default function Productstore() {
     useEffect(() => {
 
         const getProduct = async () => {
-            const res = await axios.get("/products" + path);
-            if (res) {
-                productDispatch({ type: Productactions.Feaching_success, payload: res.data })
-            } else {
 
+            try {
+
+                const res = await axios.get(`${Host}/api/products${path}`);
+                productDispatch({ type: Productactions.Feaching_success, payload: res.data })
+
+            } catch (error) {
+
+                console.log(error)
             }
         }
 
         getProduct()
 
         const getParentCategory = async () => {
-            const res = await axios.post("/categories/parent", { slug: category });
-            res && setParentCategory(res.data)
+
+            const res = await axios.post(`${Host}/api/categories/parent`, { slug: category });
+
+            setParentCategory(res.data)
         }
 
         getParentCategory()

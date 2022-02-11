@@ -1,26 +1,41 @@
 import axios from 'axios'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import BottomFooter from '../../Components/Footer/BottomFooter'
 import { Header } from "../../Components/Header/Header"
 import { Menu } from "../../Components/Menu-Header/Menu"
 import { Body, Wraper, OrderItem, OdrerImg, Title } from "./Order.style"
+import { Host } from '../../data';
+import { UserContext } from '../../Context/User/UserContextProvider';
 
 export default function Order() {
 
     const [orders, setOrders] = useState([]);
+    const { user } = useContext(UserContext);
 
     useEffect(() => {
 
-        const getOrders = async () => {
-            const res = await axios.get("/orders");
-            setOrders(res.data);
+        try {
 
+            const getOrders = async () => {
+                const res = await axios.get(`${Host}/api/orders`, {
+                    headers: {
+                        "Authorization": `Bearer ${user.token}`
+                    }
+                });
+
+                setOrders(res.data);
+            }
+
+            user && getOrders();
+
+        } catch (error) {
+
+            console.log(error);
         }
-
-        getOrders();
 
     }, []);
 
+    console.log(orders);
 
     return (
         <div>
@@ -29,11 +44,11 @@ export default function Order() {
             <Body>
                 <Wraper>
                     {
-                        orders.length > 0 && orders.map((order) =>
+                        orders.length > 0 ? orders.map((order) =>
                             order.items.map(item =>
                                 <OrderItem>
                                     <OdrerImg>
-                                        <img src={`http://localhost:8000/${item.productId.productPicture[0].img}`} />
+                                        <img src={`${Host}/${item.productId.productPicture[0].img}`} alt="" />
                                     </OdrerImg>
                                     <div>
                                         <Title>Product Name</Title>
@@ -44,12 +59,16 @@ export default function Order() {
                                         <p>${item.payablePrice}</p>
                                     </div>
                                     <div>
-                                        <Title> Pament Status</Title>
-                                        <p>{order.paymentStatus}</p>
+                                        <Title>Delevery Status</Title>
+                                        <p>{order.orderStatus[0].type}</p>
                                     </div>
                                 </OrderItem>
                             )
                         )
+                            :
+                            <div>
+                                <h3 style={{ margin: "10px 0 20px", color: "red", textAlign: "center" }}>No Orders</h3>
+                            </div>
                     }
 
                 </Wraper>

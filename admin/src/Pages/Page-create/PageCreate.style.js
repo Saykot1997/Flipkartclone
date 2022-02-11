@@ -2,7 +2,8 @@ import styled from "styled-components";
 
 export const Wraper = styled.div`
     width: 100%;
-    overflow-x: hidden;
+    height: 100vh;
+    overflow: hidden;
 `;
 
 export const Body = styled.div`
@@ -14,6 +15,7 @@ export const Body = styled.div`
 export const Container = styled.div`
   width: 85%;
   height: 100%;
+  overflow-y : scroll;
 `;
 
 export const Header = styled.div`
@@ -91,14 +93,20 @@ export const PageItem = styled.div`
     width: 100%;
     height: 120px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     align-items: center;
     img{
-      max-width: 180px;
+      max-width: 300px;
+      max-height: 200px;
     }
     p{
       padding: 5px;
       text-align: center;
+    }
+    div{
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 `
 
@@ -106,4 +114,11 @@ export const Title = styled.p`
     font-weight: 600;
     font-size: 18px;
     color: #444;
+`
+
+export const ActionBox = styled.div`
+   button{
+    padding: 5px 10px;
+    margin: 0 10px;
+   }
 `

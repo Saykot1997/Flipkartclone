@@ -9,17 +9,22 @@ export default function Filter({ setFilterAbleProduct }) {
     const [max, setMax] = useState("");
 
     const filterProduct = () => {
+
         if (max && min) {
+
             if (max < min) {
-                window.alert("maximum is smaller then minimum")
+
+                window.alert("maximum is smaller then minimum");
+
             } else {
+
                 let filteredProduct = products.filter(product => {
                     return product.price >= min && product.price <= max
                 })
 
-                setFilterAbleProduct(filteredProduct)
-                setMax("")
-                setMin("")
+                setFilterAbleProduct(filteredProduct);
+                setMax("");
+                setMin("");
             }
         }
     }
@@ -35,8 +40,8 @@ export default function Filter({ setFilterAbleProduct }) {
         <Wraper>
             <Title>Filter BY Price</Title>
             <FilterInput>
-                <input type="number" placeholder="Minimum" onChange={(e) => { setMin(e.target.value) }} />
-                <input type="number" placeholder="Maximum" onChange={(e) => { setMax(e.target.value) }} />
+                <input type="number" placeholder="Minimum" value={min} onChange={(e) => { setMin(e.target.value) }} />
+                <input type="number" placeholder="Maximum" value={max} onChange={(e) => { setMax(e.target.value) }} />
                 <div>
                     <button onClick={filterProduct}>Filter</button>
                     <button onClick={ClearFilter}>Clear Filter</button>

@@ -11,18 +11,24 @@ import BottomFooter from '../../../Components/Footer/BottomFooter';
 export default function ProductList(props) {
 
     const renderProduct = () => {
+
         const Params = GetParams(props.location.search);
         let content = null
+
         switch (Params.type) {
+
             case "store":
                 content = <Productstore {...props} />;
                 break;
+
             case "page":
                 content = <Page {...props} />
                 break;
+
             case "product":
                 content = <ProductType {...props} />
                 break;
+
             default:
                 content = null
         }

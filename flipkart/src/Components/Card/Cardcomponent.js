@@ -5,7 +5,8 @@ import Cardsactions from '../../Context/Card/Cards.actions';
 import { CardsContext } from '../../Context/Card/CardsContextProvider';
 import { IsreadyContext } from '../../Context/Isready/Isready';
 import { UserContext } from '../../Context/User/UserContextProvider';
-import { Left, HeaderArea, Bottom, Order, CartTitle, DeliveryTo, Search, SearchInput, Dicriment, Incriment, Check, Midd, Photofield, Textfield, Name, Delevery, ControlBox, Display } from './Card-component.style'
+import { Left, HeaderArea, Bottom, Order, CartTitle, DeliveryTo, Search, SearchInput, Dicriment, Incriment, Check, Midd, Photofield, Textfield, Name, Delevery, ControlBox, Display } from './Card-component.style';
+import { Host, Locationlogo, roundLogo } from '../../data';
 
 
 export default function Cardcomponent({ full, offtitle, button, small, Ordered }) {
@@ -16,22 +17,33 @@ export default function Cardcomponent({ full, offtitle, button, small, Ordered }
     const history = useHistory();
     const [offbtn, setOffbtn] = useState(false);
 
-    const roundLogo = <svg width="14" height="14" xmlns="http://www.w3.org/2000/svg" class="_3GN0Y0"><g fill="none"><path d="M-1-1h16v16H-1"></path><path d="M7 0C3.136 0 0 3.136 0 7s3.136 7 7 7 7-3.136 7-7-3.136-7-7-7zm.7 10.5H6.3V6.3h1.4v4.2zm0-5.6H6.3V3.5h1.4v1.4z" fill="#388e3c" class=""></path></g></svg>
-    const logo = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48ZWxsaXBzZSBjeD0iOSIgY3k9IjE0LjQ3OCIgZmlsbD0iI0ZGRTExQiIgcng9IjkiIHJ5PSIzLjUyMiIvPjxwYXRoIGZpbGw9IiMyODc0RjAiIGQ9Ik04LjYwOSA3LjAxYy0xLjA4IDAtMS45NTctLjgyNi0xLjk1Ny0xLjg0NSAwLS40ODkuMjA2LS45NTguNTczLTEuMzA0YTIuMDIgMi4wMiAwIDAgMSAxLjM4NC0uNTRjMS4wOCAwIDEuOTU2LjgyNSAxLjk1NiAxLjg0NCAwIC40OS0uMjA2Ljk1OS0uNTczIDEuMzA1cy0uODY0LjU0LTEuMzgzLjU0ek0zLjEzIDUuMTY1YzAgMy44NzQgNS40NzkgOC45MjIgNS40NzkgOC45MjJzNS40NzgtNS4wNDggNS40NzgtOC45MjJDMTQuMDg3IDIuMzEzIDExLjYzNCAwIDguNjA5IDAgNS41ODMgMCAzLjEzIDIuMzEzIDMuMTMgNS4xNjV6Ii8+PC9nPjwvc3ZnPg=="
-
-
     const increment = async (card) => {
 
         if (user) {
 
-            const increse = await axios.post("/cart/increment", { productId: card._id });
+            try {
 
-            if (increse.status == 200) {
-                const cartItems = await axios.get("/cart/getcarts");
+                await axios.post(`${Host}/api/cart/increment`, { productId: card._id }, {
+                    headers: {
+                        'Authorization': `Bearer ${user.token}`
+                    }
+                });
+
+                const cartItems = await axios.get(`${Host}/api/cart/getcarts`, {
+                    headers: {
+                        'Authorization': `Bearer ${user.token}`
+                    }
+                });
+
                 Cardsdispatch({ type: Cardsactions.Reset, payload: cartItems.data });
+
+            } catch (error) {
+
+                console.log(error);
             }
 
         } else {
+
             const updateAbbleCard = {
                 ...card,
                 quantity: parseInt(card.quantity) + 1
@@ -41,25 +53,47 @@ export default function Cardcomponent({ full, offtitle, button, small, Ordered }
     }
 
     const dicripent = async (card) => {
+
         if (user) {
 
-            if (card.quantity > 1) {
-                const increse = await axios.post("/cart/dicrement", { productId: card._id });
+            try {
 
-                if (increse.status == 200) {
-                    const cartItems = await axios.get("/cart/getcarts");
+                if (card.quantity > 1) {
+
+                    await axios.post(`${Host}/api/cart/dicrement`, { productId: card._id }, {
+                        headers: {
+                            'Authorization': `Bearer ${user.token}`
+                        }
+                    });
+
+                    const cartItems = await axios.get(`${Host}/api/cart/getcarts`, {
+                        headers: {
+                            'Authorization': `Bearer ${user.token}`
+                        }
+                    });
+
                     Cardsdispatch({ type: Cardsactions.Reset, payload: cartItems.data });
+
                 }
+
+            } catch (error) {
+
+                console.log(error);
             }
 
+
         } else {
+
             if (card.quantity > 1) {
+
                 const updateAbbleCard = {
                     ...card,
                     quantity: parseInt(card.quantity) - 1
                 }
                 Cardsdispatch({ type: Cardsactions.Feaching_success, payload: updateAbbleCard })
+
             } else {
+
                 window.alert("you cunt decriment less then 1 ")
             }
         }
@@ -71,10 +105,25 @@ export default function Cardcomponent({ full, offtitle, button, small, Ordered }
 
         if (user) {
 
-            const res = await axios.post("/cart/delete", { productId: card._id });
-            if (res.status === 200) {
-                const cartItems = await axios.get("/cart/getcarts");
+            try {
+
+                await axios.post(`${Host}/api/cart/delete`, { productId: card._id }, {
+                    headers: {
+                        'Authorization': `Bearer ${user.token}`
+                    }
+                });
+
+                const cartItems = await axios.get(`${Host}/api/cart/getcarts`, {
+                    headers: {
+                        'Authorization': `Bearer ${user.token}`
+                    }
+                });
+
                 Cardsdispatch({ type: Cardsactions.Reset, payload: cartItems.data });
+
+            } catch (error) {
+
+                console.log(error);
             }
 
         } else {
@@ -91,9 +140,7 @@ export default function Cardcomponent({ full, offtitle, button, small, Ordered }
     const offButton = () => {
         setOffbtn(!offbtn);
         !Isready && setIsready(!Isready);
-
     }
-    console.log(Isready)
 
 
     return (
@@ -104,7 +151,7 @@ export default function Cardcomponent({ full, offtitle, button, small, Ordered }
                         <p>My Card ({Cards.length})</p>
                     </CartTitle>
                     <div style={{ display: "flex" }}>
-                        <img style={{ marginRight: "10px" }} src={logo} alt="" />
+                        <img style={{ marginRight: "10px" }} src={Locationlogo} alt="" />
                         <DeliveryTo >Delivery to</DeliveryTo>
                         <Search style={{ display: "flex" }}>
                             <SearchInput type="text" placeholder="Enter Delivery Pincode" /> <Check>Check</Check>
@@ -116,7 +163,7 @@ export default function Cardcomponent({ full, offtitle, button, small, Ordered }
                     <Midd key={index}>
                         <div style={{ display: "flex" }}>
                             <Photofield>
-                                <img src={`http://localhost:8000/${card.img}`} alt="" />
+                                <img src={`${Host}/${card.img}`} alt="" />
                             </Photofield>
                             <Textfield>
                                 <Name>{card.name}</Name>
@@ -149,8 +196,6 @@ export default function Cardcomponent({ full, offtitle, button, small, Ordered }
                         <p >{Cards.length} Items</p>
                         <p onClick={offButton} style={{ cursor: "pointer", color: "green" }}>Edite</p>
                     </div> : null
-
-
             }
 
         </Left>

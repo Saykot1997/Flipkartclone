@@ -13,13 +13,17 @@ export const Menu = () => {
         let categoryList = []
 
         for (let category of categories) {
+
             categoryList.push(
+
                 <li>
                     {
                         category.parentId ? <Link to={`/${category.slug}/?cid=${category._id}&type=${category.type}`}>{category.name}</Link> :
                             <span>{category.name}</span>
                     }
+
                     {category.children.length > 0 ? (<ul>{showCategory(category.children)}</ul>) : null}
+
                 </li>
             )
         }

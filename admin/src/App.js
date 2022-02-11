@@ -13,6 +13,7 @@ import axios from "axios";
 import Categoryactions from "./Context/Category-Conttext/Category.actions";
 import Productactions from "./Context/Product context/Product.actions";
 import PageCreate from "./Pages/Page-create/PageCreate";
+import { HOST } from "./Data";
 
 
 
@@ -24,27 +25,41 @@ function App() {
 
   useEffect(() => {
 
-    //category data fatch
     const getCategory = async () => {
 
       try {
-        const res = await axios.get("/categories")
-        res && dispatch({ type: Categoryactions.Feaching_success, payload: res.data })
+
+        const res = await axios.get(`${HOST}/api/categories`, {
+          headers: {
+            "Authorization": `Bearer ${user.token}`
+          }
+        });
+
+        dispatch({ type: Categoryactions.Feaching_success, payload: res.data });
+
       } catch (error) {
+
         dispatch({ type: Categoryactions.Feaching_failur })
       }
     }
 
     user && getCategory()
 
-    //products data fatch
     const getData = async () => {
 
       try {
-        const res = await axios.get("/products")
-        res && productDispatch({ type: Productactions.Feaching_success, payload: res.data })
+
+        const res = await axios.get(`${HOST}/api/products`, {
+          headers: {
+            "Authorization": `Bearer ${user.token}`
+          }
+        });
+
+        productDispatch({ type: Productactions.Feaching_success, payload: res.data });
+
       } catch (error) {
-        productDispatch({ type: Productactions.Feaching_failur })
+
+        productDispatch({ type: Productactions.Feaching_failur });
       }
 
     }

@@ -15,22 +15,25 @@ Router.post('/admin/signin', async (req, res) => {
         if (user) {
 
             const varifyPassword = await bcrypt.compare(req.body.password, user.password);
+
             if (varifyPassword && user.role === "admin") {
+
                 const token = jwt.sign({ id: user._id, role: user.role }, process.env.TOKENSECRATE);
+                const { password, ...others } = user._doc;
+                res.status(200).json({ ...others, token });
 
-                const { password, ...rest } = user._doc;
-
-                res.status(200).cookie("jwt", token, { httpOnly: true }).json(rest);
             } else {
-                res.status(400).json("authentication fail")
+
+                res.status(400).json("authentication fail");
             }
 
         } else {
 
-            res.status(400).json("authentication fail")
+            res.status(400).json("authentication fail");
         }
 
     } catch (error) {
+
         console.log(error)
     }
 
@@ -38,9 +41,11 @@ Router.post('/admin/signin', async (req, res) => {
 
 //register route
 Router.post('/admin/signup', validationfunc, async (req, res) => {
+
     const email = req.body.email;
 
     try {
+
         const user = await User.findOne({ email })
 
         if (user) {
@@ -62,11 +67,13 @@ Router.post('/admin/signup', validationfunc, async (req, res) => {
                 role: "admin"
             })
 
-            const result = await saveAbleUser.save()
+            await saveAbleUser.save()
             res.status(200).json("admin has been created.");
         }
 
     } catch (error) {
+
+        console.log(error)
         res.status(400).json(error)
     }
 })

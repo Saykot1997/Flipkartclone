@@ -4,6 +4,7 @@ import { Wraper, Body, FormBox, Round1, Round2, Header, Title, Subtitle, InputFi
 import { authContext } from "../../Context/Admin Context/ContextProvider";
 import { actions } from "../../Context/Admin Context/actions";
 import axios from "axios"
+import { HOST } from "../../Data"
 
 function Signin() {
 
@@ -12,6 +13,7 @@ function Signin() {
     const [password, setPassword] = useState("");
 
     const handleSubmit = async (e) => {
+
         e.preventDefault();
         dispatch({ type: actions.Login_start });
 
@@ -23,16 +25,19 @@ function Signin() {
         if (email && password) {
 
             try {
-                const res = await axios.post("/admin/signin", userObj)
+
+                const res = await axios.post(`${HOST}/api/admin/signin`, userObj)
                 res && dispatch({ type: actions.Login_success, payload: res.data })
-                window.location.replace("/")
+                window.location.replace("/");
 
             } catch (error) {
+
                 dispatch({ type: actions.Login_failur })
                 window.alert("Wrong informations")
             }
 
         } else {
+
             window.alert("all fields are required !!")
         }
 

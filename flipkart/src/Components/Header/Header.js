@@ -2,21 +2,22 @@ import React, { useContext, useState } from 'react'
 import { Link } from "react-router-dom"
 import { logoURL, subURL } from '../../data';
 import axios from "axios";
-import {
-    Wraper, LogoImg, LoginBox, Log, LI, Sing, Sublogo, Fast, Second, Sub, Search, Right, Left, Logo, Input, SearchIcon,
-    LoginBtn, CloseBtn, Botton, More, Span, Cart, DropArrow, ShoppingCart, SigninBox, LeftBox, RightBox, SinginDiv, InputDiv,
-    PolicyBox, OR, OPT, Account, SignupBox, SingupDiv, User, ItemNumber
-} from './Header.style'
 import { UserContext } from '../../Context/User/UserContextProvider';
 import Useractions from '../../Context/User/User.actions';
 import Cardsactions from '../../Context/Card/Cards.actions';
 import { CardsContext } from '../../Context/Card/CardsContextProvider';
 import { AddressContext } from '../../Context/Address/AddressContextProvider';
 import Addressactions from '../../Context/Address/Address.actions';
-
+import {
+    Wraper, LogoImg, LoginBox, Log, LI, Sing, Sublogo, Fast, Second, Sub, Search, Right, Left, Logo, Input, SearchIcon,
+    LoginBtn, CloseBtn, Botton, More, Span, Cart, DropArrow, ShoppingCart, SigninBox, LeftBox, RightBox, SinginDiv, InputDiv,
+    PolicyBox, OR, OPT, Account, SignupBox, SingupDiv, User, ItemNumber
+} from './Header.style';
+import { Host } from '../../data';
 
 
 export const Header = () => {
+
     const { user, Userdispatch } = useContext(UserContext);
     const [loginOpen, setLoginOpen] = useState(false);
     const [loginBox, setLoginBox] = useState(false);
@@ -28,7 +29,7 @@ export const Header = () => {
     const [loginEmail, setLoginEmail] = useState("");
     const [loginPassword, setLoginPasword] = useState("");
     const { Cards, Cardsdispatch } = useContext(CardsContext);
-    const { Address, Addressdispatch } = useContext(AddressContext);
+    const { Addressdispatch } = useContext(AddressContext);
 
     const openLoginBox = () => {
         setLoginOpen(false);
@@ -47,24 +48,53 @@ export const Header = () => {
             window.alert("Fill all the fields");
 
         } else {
+
             const user = {
                 firstName,
                 lastName,
                 email: regEmail,
                 password: regPassword
             };
+
             setFirstName("");
             setLastName("");
             setRegPassword("");
             setRegEmail("");
             setSignupBox(false);
+
             try {
-                await axios.post("/signup", user);
+
+                await axios.post(`${Host}/api/signup`, user);
+                window.alert("User registered successfully");
+
             } catch (error) {
-                window.alert("Could not create user try diffrent information")
+
+                if (error.response.data === "Email is not valid") {
+
+                    window.alert("Email is not valid");
+
+                } else if (error.response.data === "firstName should be alphabetic") {
+
+                    window.alert("FirstName should be alphabetic");
+
+                } else if (error.response.data === "lastName should be alphabetic") {
+
+                    window.alert("LastName should be alphabetic");
+
+                } else if (error.response.data === "lowercase:1 upercase:1 number:1 symble:1 require minimus:8 carecter") {
+
+                    window.alert("Password should be 1 lowercase 1 upercase 1 number 1 symble and at least 8 characters");
+
+                } else if (error.response.data === "user alrady register") {
+
+                    window.alert("User already register");
+
+                } else {
+
+                    window.alert("Something went wrong");
+                }
+
             }
-
-
         }
 
     }
@@ -72,8 +102,11 @@ export const Header = () => {
     const UserLogin = async () => {
 
         if (!loginEmail || !loginPassword) {
+
             window.alert("Fill all the fields");
+
         } else {
+
             const userObj = {
                 email: loginEmail,
                 password: loginPassword
@@ -84,17 +117,23 @@ export const Header = () => {
             setLoginBox(false);
 
             try {
-                const res = await axios.post("/signin", userObj);
-                res && Userdispatch({ type: Useractions.Feaching_success, payload: res.data });
+
+                const res = await axios.post(`${Host}/api/signin`, userObj);
+                Userdispatch({ type: Useractions.Feaching_success, payload: res.data });
 
             } catch (error) {
-                window.alert("Could not login")
+
+                window.alert("Wrong information");
             }
 
 
             try {
 
-                const cards = await axios.get("/cart/getcarts");
+                const cards = await axios.get(`${Host}/api/cart/getcarts`, {
+                    headers: {
+                        "Authorization": `Bearer ${user.token}`
+                    }
+                });
                 const localCards = JSON.parse(localStorage.getItem("Cards"));
 
                 if (localCards.length > 0 && cards) {
@@ -102,39 +141,47 @@ export const Header = () => {
                     const cartItems = [];
 
                     localCards.forEach(card => {
-                        const curentCart = cards.data.find((item) => item._id == card._id);
+
+                        const curentCart = cards.data.find((item) => item._id === card._id);
 
                         if (curentCart) {
+
                             const updatedCart = {
                                 product: curentCart._id,
                                 quantity: parseInt(curentCart.quantity) + parseInt(card.quantity)
                             }
 
-                            cartItems.push(updatedCart)
+                            cartItems.push(updatedCart);
+
                         } else {
+
                             const updatedCart = {
                                 product: card._id,
                                 quantity: card.quantity
                             }
 
-                            cartItems.push(updatedCart)
+                            cartItems.push(updatedCart);
                         }
 
                     });
 
 
                     const Card = {
-
                         cartItems: cartItems
                     }
 
-                    const updateCarts = await axios.post("/cart/add", Card);
+                    const updateCarts = await axios.post(`${Host}/api/cart/add`, Card, {
+                        headers: {
+                            "Authorization": `Bearer ${user.token}`
+                        }
+                    });
 
                     if (updateCarts) {
 
                         const allCarts = await axios.get("/cart/getcarts");
                         Cardsdispatch({ type: Cardsactions.Reset, payload: allCarts.data })
                     }
+
                 } else {
 
                     const allCarts = await axios.get("/cart/getcarts");
@@ -153,12 +200,12 @@ export const Header = () => {
     }
 
     const Logout = () => {
+
         setLoginOpen(false);
         localStorage.clear();
         Userdispatch({ type: Useractions.Feaching_failur });
-        Cardsdispatch({ type: Cardsactions.Reset, payload: [] })
-        Addressdispatch({ type: Addressactions.Feaching_failur })
-
+        Cardsdispatch({ type: Cardsactions.Reset, payload: [] });
+        Addressdispatch({ type: Addressactions.Feaching_failur });
     }
 
 
@@ -238,7 +285,6 @@ export const Header = () => {
                 </Right>
             </Wraper>
 
-
             {/* signup part start */}
 
             <SingupDiv signupBox={signupBox}>
@@ -253,7 +299,7 @@ export const Header = () => {
                             <input type="text" value={firstName} autoFocus placeholder="First Name" onChange={(e) => { setFirstName(e.target.value) }} />
                         </InputDiv>
                         <InputDiv>
-                            <input type="text" value={lastName} placeholder="Lasr Name" onChange={(e) => { setLastName(e.target.value) }} />
+                            <input type="text" value={lastName} placeholder="Last Name" onChange={(e) => { setLastName(e.target.value) }} />
                         </InputDiv>
                         <InputDiv>
                             <input type="text" value={regEmail} placeholder="Email" onChange={(e) => { setRegEmail(e.target.value) }} />

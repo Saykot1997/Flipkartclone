@@ -8,6 +8,7 @@ import { PageContext } from '../../../Context/Page/PageContextProvider';
 import { GetParams } from '../../../utils/Getparams';
 import { Link } from "react-router-dom"
 import { PageTitle } from './ProductList.style';
+import { Host } from '../../../data';
 
 export default function Page(props) {
 
@@ -17,11 +18,19 @@ export default function Page(props) {
 
     useEffect(() => {
 
-        const getPage = async () => {
-            const res = await axios.get(`/page/${params.cid}/${params.type}`);
-            res && Pagedispatch({ type: Pageactions.Feaching_success, payload: res.data });
+        try {
+
+            const getPage = async () => {
+                const res = await axios.get(`${Host}/api/page/${params.cid}/${params.type}`);
+                Pagedispatch({ type: Pageactions.Feaching_success, payload: res.data });
+            }
+            getPage()
+
+        } catch (error) {
+
+            console.log(error)
+
         }
-        getPage()
 
     }, [])
 
@@ -35,7 +44,7 @@ export default function Page(props) {
                 {
                     pages && pages.banners.map((item, index) => (
                         <Link style={{ display: "block", marginBottom: "50px" }} to={`/brand/${path}`} key={index}>
-                            <img src={`http://localhost:8000/${item.img}`} alt="" />
+                            <img src={`${Host}/${item.img}`} alt="" style={{ width: "100%", height: "100vh" }} />
                         </Link>
                     ))
                 }

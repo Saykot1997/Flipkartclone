@@ -10,10 +10,12 @@ import { categoryContext } from "../../Context/Category-Conttext/CategoryContext
 import { FaWindowClose } from 'react-icons/fa';
 import { ImCheckboxUnchecked, ImCheckboxChecked } from "react-icons/im";
 import { IoMdArrowDropright, IoMdArrowDropdown } from "react-icons/io";
-
+import { HOST } from "../../Data";
+import { authContext } from "../../Context/Admin Context/ContextProvider";
 
 function Category() {
 
+    const { user } = useContext(authContext);
     const { categories, dispatch } = useContext(categoryContext);
     const [open, setOpen] = useState(false);
     const [catName, setCatName] = useState("");
@@ -33,8 +35,8 @@ function Category() {
         let categoryList = []
 
         for (let category of categories) {
-            categoryList.push(
 
+            categoryList.push(
                 {
                     value: category._id,
                     label: category.name,
@@ -51,19 +53,20 @@ function Category() {
     };
 
     const handleDeleteCategory = () => {
+
         setDeleteCategory(!deleteCategory);
-
         const category = createCategory(categories);
-
         const checkedArray = []
         const expandedArray = []
 
         checked.length > 0 && checked.forEach((categoryId) => {
+
             const CheckedCategory = category.find((cat) => categoryId === cat.value);
             CheckedCategory && checkedArray.push(CheckedCategory);
         })
 
         expanded.length > 0 && expanded.forEach((categoryId) => {
+
             const ExpandedCategory = category.find((cat) => categoryId === cat.value);
             ExpandedCategory && expandedArray.push(ExpandedCategory);
         })
@@ -73,30 +76,45 @@ function Category() {
     };
 
     const denayDelete = () => {
+
         setDeleteCategory(!deleteCategory);
     };
 
     const confirmDelete = async () => {
 
         if (checkedArray.length > 0) {
+
             setDeleteCategory(!deleteCategory);
-            //   const expandedIdArray = expandedArray.map((item, index) => ({ _id: item.value }));
             const checkedIdArray = checkedArray.map((item, index) => ({ _id: item.value }));
-            //  const idsArray = expandedIdArray.concat(checkedIdArray);
 
             if (checkedIdArray.length > 0) {
-                const res = await axios.post("/category/delete", { payload: checkedIdArray });
+
+                const res = await axios.post(`${HOST}/api/category/delete`, { payload: checkedIdArray }, {
+                    headers: {
+                        "Authorization": `Bearer ${user.token}`
+                    }
+                });
+
                 if (res.status === 200) {
+
                     try {
-                        const res = await axios.get("/categories");
+
+                        const res = await axios.get(`${HOST}/api/categories`, {
+                            headers: {
+                                "Authorization": `Bearer ${user.token}`
+                            }
+                        });
                         res && dispatch({ type: Categoryactions.Feaching_success, payload: res.data });
+
                     } catch (error) {
+
                         window.alert("could not update");
                     }
                 }
             }
 
         } else {
+
             window.alert("you hove to checked an category ")
         }
 
@@ -105,10 +123,14 @@ function Category() {
 
 
     const HandleCategoryName = (key, value, index, type) => {
+
         if (type === "checked") {
+
             const updatedCheckedArray = checkedArray.map((item, _index) => index === _index ? { ...item, [key]: value } : item);
             setCheckedArray(updatedCheckedArray);
+
         } else if (type === "expanded") {
+
             const updatedExpandedArray = expandedArray.map((item, _index) => index === _index ? { ...item, [key]: value } : item);
             setExpandedArray(updatedExpandedArray);
         }
@@ -119,6 +141,7 @@ function Category() {
     };
 
     const openUpdatebox = () => {
+
         setUpdateCategory(!updateCategory);
         const category = createCategory(categories);
 
@@ -142,13 +165,17 @@ function Category() {
     const createCategory = (categories, options = []) => {
 
         for (let category of categories) {
+
             options.push({
+
                 value: category._id,
                 name: category.name,
                 parentId: category.parentId,
                 type: category.type
             });
+
             if (category.children.length > 0) {
+
                 createCategory(category.children, options);
             }
         }
@@ -178,11 +205,20 @@ function Category() {
 
             try {
 
-                const res = await axios.post("/category/create", formData);
+                const res = await axios.post(`${HOST}/api/category/create`, formData, {
+                    headers: {
+                        "Authorization": `Bearer ${user.token}`
+                    }
+                });
 
                 if (res) {
 
-                    const newCategory = await axios.get("/categories");
+                    const newCategory = await axios.get(`${HOST}/api/categories`, {
+                        headers: {
+                            "Authorization": `Bearer ${user.token}`
+                        }
+                    });
+
                     newCategory && dispatch({ type: Categoryactions.Feaching_success, payload: newCategory.data });
                     newCategory && setOpen(false);
 
@@ -201,11 +237,15 @@ function Category() {
     }
 
     const updateFormData = async () => {
+
         closeUpdatebox();
+
         if (checkedArray.length > 0) {
+
             const form = new FormData();
 
             expandedArray.forEach((item, index) => {
+
                 form.append("_id", item.value);
                 form.append("name", item.name);
                 form.append("parentId", item.parentId ? item.parentId : "");
@@ -213,24 +253,39 @@ function Category() {
             });
 
             checkedArray.forEach((item, index) => {
+
                 form.append("_id", item.value);
                 form.append("name", item.name);
                 form.append("parentId", item.parentId ? item.parentId : "");
                 form.append("type", item.type.toLocaleLowerCase());
             })
 
-            const res = await axios.post("/category/update", form);
+            const res = await axios.post(`${HOST}/api/category/update`, form, {
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
+            });
 
             if (res.status === 200) {
 
                 try {
-                    const res = await axios.get("/categories");
-                    res && dispatch({ type: Categoryactions.Feaching_success, payload: res.data });
+
+                    const res = await axios.get(`${HOST}/api/categories`, {
+                        headers: {
+                            "Authorization": `Bearer ${user.token}`
+                        }
+                    });
+
+                    dispatch({ type: Categoryactions.Feaching_success, payload: res.data });
+
                 } catch (error) {
+
                     window.alert("could not update");
                 }
             }
+
         } else {
+
             window.alert("You have to checked an category")
         }
     }
@@ -294,7 +349,6 @@ function Category() {
                                         <option value="product">Product</option>
                                         <option value="page">Page</option>
                                     </select>
-                                    {/* <Input type="file" file value={catImg} onChange={(e) => { setCatImg(e.target.files[0]) }} /> */}
                                 </InputField>)
                         }
 

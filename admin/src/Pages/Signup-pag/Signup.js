@@ -1,7 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
 import Navbar from "../../Components/Navbar/Navbar";
-import { Wraper, Body, FormBox, Round1, Round2, Header, Title, Subtitle, InputFilds, FirstNameField, LastNameField, EmailField, PasswordField, Input, SubmitFild, Button } from "./Singup-style"
+import { Wraper, Body, FormBox, Round1, Round2, Header, Title, Subtitle, InputFilds, FirstNameField, LastNameField, EmailField, PasswordField, Input, SubmitFild, Button } from "./Singup-style";
+import { HOST } from "../../Data"
 
 
 function Signup() {
@@ -12,6 +13,7 @@ function Signup() {
     const [password, setPassword] = useState("");
 
     const handleSubmit = async (e) => {
+
         e.preventDefault();
 
         const userObj = {
@@ -22,13 +24,18 @@ function Signup() {
         }
 
         if (firstName && lastName && email && password) {
+
             try {
-                const res = await axios.post("/admin/signup", userObj);
-                res.status === 200 && window.location.replace("/signin")
+
+                const res = await axios.post(`${HOST}/api/admin/signup`, userObj);
+                res.status === 200 && window.location.replace("/signin");
+
             } catch (error) {
+
                 window.alert("There is a probleme in creating the user.Tty diffrent informations.")
             }
         } else {
+
             window.alert("all files are required !!")
         }
     }

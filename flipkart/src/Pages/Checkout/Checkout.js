@@ -17,6 +17,7 @@ import { CardsContext } from '../../Context/Card/CardsContextProvider';
 import Cardsactions from '../../Context/Card/Cards.actions';
 import Cardcomponent from '../../Components/Card/Cardcomponent';
 import { IsreadyContext } from '../../Context/Isready/Isready';
+import { Host, SignLogo } from '../../data';
 
 export default function Checkout() {
 
@@ -41,8 +42,6 @@ export default function Checkout() {
     const [order, setOrder] = useState("");
     const [confirmOrder, setConfirmOrder] = useState(false);
 
-    const SignLogo = "https://static-assets-web.flixcart.com/www/linchpin/fk-cp-zion/img/shield_b33c0c.svg"
-
     const login = async () => {
 
         if (!email || !password) {
@@ -52,6 +51,7 @@ export default function Checkout() {
         } else {
 
             try {
+
                 const userObj = {
                     email,
                     password
@@ -59,16 +59,22 @@ export default function Checkout() {
 
                 setEmail("")
                 setPassword("");
-                const res = await axios.post("/signin", userObj);
+                const res = await axios.post(`${Host}/api/signin`, userObj);
                 Userdispatch({ type: Useractions.Feaching_success, payload: res.data })
 
             } catch (error) {
+
                 console.log(error)
             }
 
             try {
 
-                const cards = await axios.get("/cart/getcarts");
+                const cards = await axios.get(`${Host}/api/cart/getcarts`, {
+                    headers: {
+                        'Authorization': `Bearer ${user.token}`
+                    }
+                });
+
                 const localCards = JSON.parse(localStorage.getItem("Cards"));
 
                 if (localCards.length > 0 && cards) {
@@ -76,16 +82,20 @@ export default function Checkout() {
                     const cartItems = [];
 
                     localCards.forEach(card => {
-                        const curentCart = cards.data.find((item) => item._id == card._id);
+
+                        const curentCart = cards.data.find((item) => item._id === card._id);
 
                         if (curentCart) {
+
                             const updatedCart = {
                                 product: curentCart._id,
                                 quantity: parseInt(curentCart.quantity) + parseInt(card.quantity)
                             }
 
-                            cartItems.push(updatedCart)
+                            cartItems.push(updatedCart);
+
                         } else {
+
                             const updatedCart = {
                                 product: card._id,
                                 quantity: card.quantity
@@ -102,16 +112,16 @@ export default function Checkout() {
                         cartItems: cartItems
                     }
 
-                    const updateCarts = await axios.post("/cart/add", Card);
+                    const updateCarts = await axios.post(`${Host}/api/cart/add`, Card);
 
                     if (updateCarts) {
 
-                        const allCarts = await axios.get("/cart/getcarts");
+                        const allCarts = await axios.get(`${Host}/api/cart/getcarts`);
                         Cardsdispatch({ type: Cardsactions.Reset, payload: allCarts.data })
                     }
                 } else {
 
-                    const allCarts = await axios.get("/cart/getcarts");
+                    const allCarts = await axios.get(`${Host}/api/cart/getcarts`);
                     Cardsdispatch({ type: Cardsactions.Reset, payload: allCarts.data })
 
                 }
@@ -172,7 +182,11 @@ export default function Checkout() {
                 addressType
             };
 
-            const Address = await axios.post("/user/address/create", { address });
+            const Address = await axios.post(`${Host}/api/user/address/create`, { address }, {
+                headers: {
+                    'Authorization': `Bearer ${user.token}`
+                }
+            });
             Addressdispatch({ type: Addressactions.Feaching_success, payload: Address.data.address });
 
             setName(Address.data.address.name);
@@ -204,7 +218,11 @@ export default function Checkout() {
 
         setEdit(!edit)
 
-        const Address = await axios.put("/user/address/update", { address });
+        const Address = await axios.put(`${Host}/api/user/address/update`, { address }, {
+            headers: {
+                'Authorization': `Bearer ${user.token}`
+            }
+        });
         Addressdispatch({ type: Addressactions.Feaching_success, payload: Address.data.address });
 
         setName(Address.data.address.name);
@@ -220,10 +238,19 @@ export default function Checkout() {
     }
 
     useEffect(() => {
+
         const getAddress = async () => {
+
             try {
+
                 if (user) {
-                    const Address = await axios.get("/user/address");
+
+                    const Address = await axios.get(`${Host}/api/user/address`, {
+                        headers: {
+                            'Authorization': `Bearer ${user.token}`
+                        }
+                    });
+
                     Addressdispatch({ type: Addressactions.Feaching_success, payload: Address.data.address });
 
                     setName(Address.data.address.name);
@@ -272,11 +299,20 @@ export default function Checkout() {
             ]
 
         }
-        const res = await axios.get("/user/address");
+        const res = await axios.get(`${Host}/api/user/address`, {
+            headers: {
+                'Authorization': `Bearer ${user.token}`
+            }
+        });
         orderObj.addressId = res.data._id
 
         if (res) {
-            const res = await axios.post("/order/add", orderObj);
+            const res = await axios.post(`${Host}/api/order/add`, orderObj, {
+                headers: {
+                    'Authorization': `Bearer ${user.token}`
+                }
+            });
+
             res && Cardsdispatch({ type: Cardsactions.Reset, payload: [] })
         }
     }

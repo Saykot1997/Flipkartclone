@@ -24,7 +24,6 @@ export const Thumnail = styled.div`
     height: 448px;
     width: 80px;
     display: flex;
-   // justify-content: center;
     align-items: center;
     flex-direction: column;
 
@@ -40,6 +39,8 @@ export const Thumnail = styled.div`
         img{
             width: 40px;
             height: 60px;
+            object-fit: cover;
+            text-align: center;
         }
     }
 

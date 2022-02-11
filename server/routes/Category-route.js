@@ -4,6 +4,8 @@ const Category = require('../models/Category-model')
 const authGurd = require('../authgurd/authGurd')
 const adminMiddleWire = require('../authgurd/addminmiddlewere');
 const { upload } = require("../controles/FileUpload");
+const Page = require("../models/Page-model");
+const Product = require("../models/Products-model");
 
 // category create
 Router.post('/category/create', authGurd, adminMiddleWire, upload.single('files'), async (req, res) => {  //
@@ -53,6 +55,7 @@ Router.get('/categories', async (req, res) => {
         let category
 
         if (parentId === null) {
+
             category = categories.filter(cat => cat.parentId === undefined);
 
         } else {
@@ -93,15 +96,21 @@ Router.get('/categories', async (req, res) => {
 Router.post("/categories/parent", async (req, res) => {
 
     try {
+
         const category = await Category.findOne({ name: req.body.slug });
+
         if (category) {
+
             const parentCategory = await Category.findById(category.parentId);
-            res.status(200).json(parentCategory.name)
+            res.status(200).json(parentCategory.name);
+
         } else {
+
             res.status(400).json("could not find category")
         }
 
     } catch (error) {
+
         res.status(400).json("could not found category")
     }
 });
@@ -159,16 +168,27 @@ Router.post('/category/update', upload.array('files'), async (req, res) => {
 // delete category
 
 Router.post('/category/delete', async (req, res) => {
+
     const ids = req.body.payload;
+
     try {
+
         const deletedIds = [];
+
         for (let id of ids) {
+
             const deletedId = await Category.findOneAndDelete({ _id: id._id });
-            deletedId && deletedIds.push(deletedId);
+            await Page.deleteMany({ category: id._id });
+            await Product.deleteMany({ category: id._id });
+            deletedIds.push(deletedId);
         };
-        deletedIds.length == ids.length && res.status(200).json(deletedIds)
+
+        deletedIds.length == ids.length && res.status(200).json(deletedIds);
+
     } catch (error) {
-        res.status(400).json("could not delete")
+
+        console.log(error)
+        res.status(400).json("could not delete");
     }
 })
 

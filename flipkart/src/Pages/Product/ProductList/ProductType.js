@@ -5,28 +5,29 @@ import { useLocation } from 'react-router';
 import Productactions from '../../../Context/Product context/Product.actions';
 import { productContext } from '../../../Context/Product context/ProductContextProvider';
 import { Body, FilterSec, ProductSec, WraperBox, SingleProduct, SPIMG, SPDetails, Name, Price } from './ProductList.style';
-import BottomFooter from '../../../Components/Footer/BottomFooter';
 import Filter from '../../../Components/Filter/Filter';
+import { Host, ProductTypePagelogo } from '../../../data';
 
 export default function ProductType() {
 
     const [filterAbleProduct, setFilterAbleProduct] = useState(null);
-    const PF = "http://localhost:8000/"
+    const PF = Host + "/"
     const { productDispatch } = useContext(productContext)
     const path = useLocation().pathname;
-    const logo = "https://static-assets-web.flixcart.com/www/linchpin/fk-cp-zion/img/fa_62673a.png"
-
 
     useEffect(() => {
 
         const getProduct = async () => {
-            const res = await axios.get("/products/" + path);
+
+            const res = await axios.get(`${Host}/products/${path}`);
 
             if (Array.isArray(res.data)) {
+
                 productDispatch({ type: Productactions.Feaching_success, payload: res.data });
                 setFilterAbleProduct(res.data);
 
             } else if (Array.isArray(res.data.products)) {
+
                 productDispatch({ type: Productactions.Feaching_success, payload: res.data.products });
                 setFilterAbleProduct(res.data.products);
             }
@@ -51,11 +52,11 @@ export default function ProductType() {
                                 <Link to={`/${product.slug}/${product._id}/p`} style={{ color: "#333", textDecoration: "none" }}>
                                     <SingleProduct>
                                         <SPIMG>
-                                            <img src={`${PF}${product.productPicture[0].img}`} />
+                                            <img src={`${PF}${product.productPicture[0].img}`} alt="" />
                                         </SPIMG>
                                         <SPDetails>
                                             <Name>{product.name}</Name>
-                                            <img src={logo} style={{ height: "20px", width: "70px" }} alt="" />
+                                            <img src={ProductTypePagelogo} style={{ height: "20px", width: "70px" }} alt="" />
                                             <Price>${product.price} <span>82% off</span></Price>
                                         </SPDetails>
                                     </SingleProduct>

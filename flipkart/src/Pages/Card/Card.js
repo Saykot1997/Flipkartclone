@@ -1,12 +1,12 @@
 import axios from 'axios';
 import React, { useContext, useEffect } from 'react'
 import Cardcomponent from '../../Components/Card/Cardcomponent';
-import BottomFooter from '../../Components/Footer/BottomFooter';
 import { Header } from '../../Components/Header/Header'
 import Cardsactions from '../../Context/Card/Cards.actions';
 import { CardsContext } from '../../Context/Card/CardsContextProvider';
 import { UserContext } from '../../Context/User/UserContextProvider';
-import { Body, Wraper, Right, Green, Total, Saved, PriceDiv, PdetailDiv } from './Card.style'
+import { Body, Wraper, Right, Green, Total, Saved, PriceDiv, PdetailDiv } from './Card.style';
+import { Host, SignLogo } from '../../data';
 
 
 export default function Card() {
@@ -14,14 +14,18 @@ export default function Card() {
     const { user } = useContext(UserContext);
     const { Cards, Cardsdispatch } = useContext(CardsContext);
 
-    const SignLogo = "https://static-assets-web.flixcart.com/www/linchpin/fk-cp-zion/img/shield_b33c0c.svg"
-
-
     useEffect(() => {
+
         const getCards = async () => {
 
             if (user) {
-                const cards = await axios.get("/cart/getcarts");
+
+                const cards = await axios.get(`${Host}/api/cart/getcarts`, {
+                    headers: {
+                        'Authorization': `Bearer ${user.token}`
+                    }
+                });
+
                 Cardsdispatch({ type: Cardsactions.Reset, payload: cards.data })
             }
         }

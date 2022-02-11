@@ -6,10 +6,13 @@ import axios from "axios"
 import { categoryContext } from "../../Context/Category-Conttext/CategoryContextProvider"
 import { FaWindowClose } from 'react-icons/fa';
 import { productContext } from "../../Context/Product context/ProductContextProvider"
-import Productactions from "../../Context/Product context/Product.actions"
+import Productactions from "../../Context/Product context/Product.actions";
+import { HOST } from "../../Data";
+import { authContext } from "../../Context/Admin Context/ContextProvider";
 
 function Product() {
 
+    const { user } = useContext(authContext);
     const { products, productDispatch } = useContext(productContext);
     const { categories } = useContext(categoryContext);
     const [open, setOpen] = useState(false);
@@ -23,19 +26,27 @@ function Product() {
     const [updateProductPicture, setUpdateProductPicture] = useState([]);
     const [description, setDscription] = useState("");
     const [quantity, setQuantity] = useState();
-    const [updateProductId, setUpdateProductId] = useState("")
+    const [updateProductId, setUpdateProductId] = useState("");
+
 
 
     useEffect(() => {
 
-        //products data fatch
         const getData = async () => {
 
             try {
-                const res = await axios.get("/products")
-                res && productDispatch({ type: Productactions.Feaching_success, payload: res.data })
+
+                const res = await axios.get(`${HOST}/api/products`, {
+                    headers: {
+                        "Authorization": `Bearer ${user.token}`
+                    }
+                });
+
+                productDispatch({ type: Productactions.Feaching_success, payload: res.data });
+
             } catch (error) {
-                productDispatch({ type: Productactions.Feaching_failur })
+
+                productDispatch({ type: Productactions.Feaching_failur });
             }
 
         }
@@ -45,14 +56,13 @@ function Product() {
     }, []);
 
 
-
     const closebox = () => {
         setOpen(!open);
         setOpenDetail(false);
     }
 
     const openUpdateProductfun = (product) => {
-        // console.log(product)
+
         setopenUpdateProduct(!openUpdateProduct)
         setProductName(product.name);
         setPrice(product.price)
@@ -61,9 +71,10 @@ function Product() {
         setUpdateProductId(product._id)
         setcategory(product.category._id)
     }
-    const closeUpdateProduct = () => {
-        setopenUpdateProduct(!openUpdateProduct)
 
+    const closeUpdateProduct = () => {
+
+        setopenUpdateProduct(!openUpdateProduct);
         setProductName("");
         setPrice("")
         setDscription("")
@@ -73,11 +84,13 @@ function Product() {
     }
 
     const OpenDetailPage = () => {
+
         setOpenDetail(!openDeatil);
         setOpen(false);
     }
 
     const ProductDetails = (p) => {
+
         setOpenDetail(!openDeatil);
         setProductDetail(p);
     }
@@ -96,25 +109,28 @@ function Product() {
 
 
     const FileUpload = (e) => {
+
         setProductPicture([
             ...productPicture,
             e.target.files[0]
         ])
-    }
+    };
+
     const UpdateFileUpload = (e) => {
+
         setUpdateProductPicture([
             ...updateProductPicture,
             e.target.files[0]
         ])
     }
 
-
-
-
+    // create product
     const submitData = async () => {
 
         if (!productName || !price || !quantity || !description || !category || !productPicture) {
-            window.alert("You have to fill all the fileds.")
+
+            window.alert("You have to fill all the fileds.");
+
         } else {
 
             const formData = new FormData()
@@ -137,13 +153,22 @@ function Product() {
 
             try {
 
-                const res = await axios.post("product/create", formData);
+                const res = await axios.post(`${HOST}/api/product/create`, formData, {
+                    headers: {
+                        "Authorization": `Bearer ${user.token}`
+                    }
+                });
 
                 if (res) {
 
-                    const newProduct = await axios.get("/products");
-                    newProduct && productDispatch({ type: Productactions.Feaching_success, payload: newProduct.data });
-                    newProduct && setOpen(false);
+                    const newProduct = await axios.get(`${HOST}/api/products`, {
+                        headers: {
+                            "Authorization": `Bearer ${user.token}`
+                        }
+                    });
+
+                    productDispatch({ type: Productactions.Feaching_success, payload: newProduct.data });
+                    setOpen(false);
 
                 } else {
 
@@ -152,10 +177,14 @@ function Product() {
                 }
 
             } catch (error) {
-                window.alert("could not create product !!")
+
+                window.alert("could not create product !!");
             }
         }
-    }
+    };
+
+
+    // update product
     const UpdatetData = async () => {
 
         const formData = new FormData()
@@ -180,14 +209,22 @@ function Product() {
 
         try {
 
-            const res = await axios.put(`product/update/${updateProductId}`, formData);
-            console.log(res)
+            const res = await axios.put(`${HOST}/api/product/update/${updateProductId}`, formData, {
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
+            });
 
             if (res) {
 
-                const newProduct = await axios.get("/products");
-                newProduct && productDispatch({ type: Productactions.Feaching_success, payload: newProduct.data });
-                newProduct && setopenUpdateProduct(!openUpdateProduct)
+                const newProduct = await axios.get(`${HOST}/api/products`, {
+                    headers: {
+                        "Authorization": `Bearer ${user.token}`
+                    }
+                });
+
+                productDispatch({ type: Productactions.Feaching_success, payload: newProduct.data });
+                setopenUpdateProduct(!openUpdateProduct);
 
             } else {
 
@@ -196,16 +233,30 @@ function Product() {
             }
 
         } catch (error) {
+
             window.alert("could not create product !!")
         }
 
     }
 
+
+    // delete product
     const DeleteProduct = async (productId) => {
-        const res = await axios.delete(`/product/delete/${productId}`);
-        if (res) {
-            const newProductLIst = products.filter((product) => product._id.toString() != productId)
-            productDispatch({ type: Productactions.Feaching_success, payload: newProductLIst })
+
+        try {
+
+            await axios.delete(`${HOST}/api/product/delete/${productId}`, {
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
+            });
+
+            const newProductLIst = products.filter((product) => product._id.toString() !== productId);
+            productDispatch({ type: Productactions.Feaching_success, payload: newProductLIst });
+
+        } catch (error) {
+
+            window.alert("could not delete product !!");
         }
     }
 
@@ -313,7 +364,7 @@ function Product() {
                                     <PictureBox>
                                         {productDetail.productPicture.map((p) => (
                                             <SingleImgBox>
-                                                <SingleImg src={`http://localhost:8000/${p.img}`} alt="" />
+                                                <SingleImg src={`${HOST}/${p.img}`} alt="" />
                                             </SingleImgBox>
                                         ))}
                                     </PictureBox>
@@ -370,7 +421,6 @@ function Product() {
         </Wraper>
     )
 }
-
 
 
 export default Product

@@ -2,23 +2,34 @@ const jwt = require("jsonwebtoken");
 
 const authgurd = async (req, res, next) => {
 
-    const token = req.cookies.jwt;
+    if (req.headers.authorization) {
 
-    try {
-        const isvarified = await jwt.verify(token, process.env.TOKENSECRATE);
+        const token = req.headers.authorization.replace("Bearer ", "");
 
-        if (isvarified) {
-            req.user_id = isvarified.id
-            req.body.role = isvarified.role
+        try {
+            const isvarified = await jwt.verify(token, process.env.TOKENSECRATE);
 
-            next()
-        } else {
-            res.status(400).json('you need to login first !!')
+            if (isvarified) {
+
+                req.user_id = isvarified.id
+                req.body.role = isvarified.role
+                next();
+
+            } else {
+
+                res.status(400).json('token is not varified')
+            }
         }
+        catch (error) {
+
+            res.status(500).json('you need to login first !!')
+        }
+
+    } else {
+
+        res.status(401).json("You are not authorized login first")
     }
-    catch (error) {
-        res.status(500).json('you need to login first !!')
-    }
+
 }
 
 module.exports = authgurd

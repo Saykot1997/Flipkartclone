@@ -1,13 +1,16 @@
 import Navbar from "../../Components/Navbar/Navbar"
-import { Wraper, Body, Container, CreatePage, HeaderBox, CatHeader, Title, InputField, Input, SubmitField, AddCatButton, PageCreateButton, Header, PageItem } from "./PageCreate.style"
+import { Wraper, Body, Container, ActionBox, CreatePage, HeaderBox, CatHeader, Title, InputField, Input, SubmitField, AddCatButton, PageCreateButton, Header, PageItem } from "./PageCreate.style"
 import Sidebar from "../../Components/Sidebar/Sidebar"
 import { useContext, useEffect, useState } from "react"
 import { FaWindowClose } from 'react-icons/fa';
 import { categoryContext } from "../../Context/Category-Conttext/CategoryContextProvider";
 import axios from "axios";
+import { HOST } from "../../Data"
+import { authContext } from "../../Context/Admin Context/ContextProvider";
 
 function PageCreate() {
 
+    const { user } = useContext(authContext);
     const { categories } = useContext(categoryContext);
     const [pageName, setPageName] = useState("");
     const [pageDesc, setPageDesc] = useState("");
@@ -18,15 +21,18 @@ function PageCreate() {
     const [productImg, setProductImg] = useState([]);
     const [pages, setPages] = useState(null);
 
-
-
     useEffect(() => {
 
         const getPages = async () => {
-            const res = await axios.get("/pages")
+            const res = await axios.get(`${HOST}/api/pages`, {
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
+            })
             setPages(res.data)
         }
-        getPages()
+        getPages();
+
     }, [])
 
 
@@ -40,9 +46,10 @@ function PageCreate() {
     };
 
     const changeCategory = (e) => {
+
         setParentId(e.target.value);
         const cat = createCategory(categories);
-        const categoriesof = cat.find((cate) => cate.value == e.target.value);
+        const categoriesof = cat.find((cate) => cate.value === e.target.value);
         setType(categoriesof.type)
 
     }
@@ -50,12 +57,14 @@ function PageCreate() {
     const createCategory = (categories, options = []) => {
 
         for (let category of categories) {
+
             options.push({
                 value: category._id,
                 name: category.name,
                 parentId: category.parentId,
                 type: category.type
             });
+
             if (category.children.length > 0) {
                 createCategory(category.children, options);
             }
@@ -65,22 +74,30 @@ function PageCreate() {
     }
 
     const submitForm = async () => {
+
         if (pageName && pageDesc && parentId && bannerImg.length > 0 && productImg.length > 0) {
+
             const form = new FormData();
             form.append("title", pageName);
             form.append("description", pageDesc);
             form.append("category", parentId);
             form.append("type", type);
+
             bannerImg.forEach((item) => {
                 form.append("banners", item)
             });
+
             productImg.forEach((item) => {
                 form.append("products", item)
             });
 
-            const res = await axios.post("/page/create", form);
-            console.log(res.data);
+            const res = await axios.post(`${HOST}/api/page/create`, form, {
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
+            });
 
+            setPages(res.data);
             setOpen(!open);
             setPageName("");
             setPageDesc("");
@@ -91,9 +108,28 @@ function PageCreate() {
 
 
         } else {
+
             window.alert("Fill all the fileds")
         }
 
+    }
+
+    const DeletePage = (id) => {
+
+        try {
+
+            const res = axios.delete(`${HOST}/api/page/delete/${id}`, {
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
+            });
+
+            setPages(res.data);
+
+        } catch (error) {
+
+            console.log(error)
+        }
     }
 
 
@@ -158,7 +194,7 @@ function PageCreate() {
                             pages && pages.map((page, i) => (
                                 <PageItem key={i}>
                                     <div>
-                                        <img src={`http://localhost:8000/${page.banners[0].img}`} alt="" />
+                                        <img src={`${HOST}/${page.banners[0].img}`} alt="" />
                                     </div>
                                     <div>
                                         <Title>Category</Title>
@@ -171,6 +207,13 @@ function PageCreate() {
                                     <div>
                                         <Title>Type</Title>
                                         <p>{page.type}</p>
+                                    </div>
+                                    <div >
+                                        <Title>Actions</Title>
+                                        <ActionBox>
+                                            <button >Eddite</button>
+                                            <button onClick={() => DeletePage(page._id)}>Delete</button>
+                                        </ActionBox>
                                     </div>
                                 </PageItem>
                             ))
