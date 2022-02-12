@@ -103,7 +103,13 @@ export default function Checkout() {
 
             } catch (error) {
 
-                console.log(error)
+                if (error.response.data === "authentication fail") {
+
+                    window.alert("email or password is wrong");
+
+                }
+
+                console.log(error.response)
             }
 
             try {
