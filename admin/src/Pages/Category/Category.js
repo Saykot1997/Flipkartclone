@@ -317,7 +317,7 @@ function Category() {
                                     <option key={index} value={op.value}>{op.name}</option>
                                 ))}
                             </select>
-                            <Input type="file" file value={catImg} onChange={(e) => { setCatImg(e.target.files[0]) }} />
+                            {/* <Input type="file" file value={catImg} onChange={(e) => { setCatImg(e.target.files[0]) }} /> */}
                         </InputField>
                         <SubmitField>
                             <AddCatButton onClick={submitData}>Add Category</AddCatButton>

@@ -55,9 +55,11 @@ export const PictureBox = styled.div`
     div{
         width: 75%;
         height: 100%;
+        overflow: hidden;
 
         img{
-
+            object-fit: cover;
+            width: 100%;
             height: 100%;
         }
     }

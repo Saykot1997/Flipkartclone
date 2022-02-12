@@ -47,6 +47,7 @@ Router.post("/user/address/create", authGurd, async (req, res) => {
 Router.get("/user/address", authGurd, async (req, res) => {
 
     try {
+
         const address = await UserAddress.findOne({ user: req.user_id });
         res.status(200).json(address);
 
@@ -54,9 +55,6 @@ Router.get("/user/address", authGurd, async (req, res) => {
 
         res.status(400).json(error);
     }
-
-
-
 });
 
 

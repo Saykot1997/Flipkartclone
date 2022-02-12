@@ -96,8 +96,8 @@ export const PageItem = styled.div`
     grid-template-columns: repeat(5, 1fr);
     align-items: center;
     img{
-      max-width: 300px;
-      max-height: 200px;
+      max-width: 260px;
+      max-height: 100px;
     }
     p{
       padding: 5px;

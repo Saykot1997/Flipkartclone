@@ -42,6 +42,45 @@ export default function Checkout() {
     const [order, setOrder] = useState("");
     const [confirmOrder, setConfirmOrder] = useState(false);
 
+    useEffect(() => {
+
+        const getAddress = async () => {
+
+            try {
+
+                if (user) {
+
+                    const Address = await axios.get(`${Host}/api/user/address`, {
+                        headers: {
+                            'Authorization': `Bearer ${user.token}`
+                        }
+                    });
+
+                    Addressdispatch({ type: Addressactions.Feaching_success, payload: Address.data.address });
+
+                    setName(Address.data.address.name);
+                    setPinCode(Address.data.address.pinCode);
+                    setMobileNum(Address.data.address.mobileNumber);
+                    setLocality(Address.data.address.locality);
+                    setAreaStreat(Address.data.address.address);
+                    setCity(Address.data.address.city);
+                    setState(Address.data.address.state);
+                    setlandmark(Address.data.address.landmark);
+                    setAltmobile(Address.data.address.alterMobileNumber);
+                    setAddressType(Address.data.address.addressType);
+                }
+
+            } catch (error) {
+
+                console.log(error)
+            }
+        }
+
+        getAddress()
+
+    }, [user])
+
+
     const login = async () => {
 
         if (!email || !password) {
@@ -119,20 +158,17 @@ export default function Checkout() {
                         const allCarts = await axios.get(`${Host}/api/cart/getcarts`);
                         Cardsdispatch({ type: Cardsactions.Reset, payload: allCarts.data })
                     }
+
                 } else {
 
                     const allCarts = await axios.get(`${Host}/api/cart/getcarts`);
                     Cardsdispatch({ type: Cardsactions.Reset, payload: allCarts.data })
-
                 }
-
 
             } catch (error) {
 
                 console.log(error)
             }
-
-
         }
     }
 
@@ -187,8 +223,8 @@ export default function Checkout() {
                     'Authorization': `Bearer ${user.token}`
                 }
             });
-            Addressdispatch({ type: Addressactions.Feaching_success, payload: Address.data.address });
 
+            Addressdispatch({ type: Addressactions.Feaching_success, payload: Address.data.address });
             setName(Address.data.address.name);
             setPinCode(Address.data.address.pinCode);
             setMobileNum(Address.data.address.mobileNumber);
@@ -223,8 +259,8 @@ export default function Checkout() {
                 'Authorization': `Bearer ${user.token}`
             }
         });
-        Addressdispatch({ type: Addressactions.Feaching_success, payload: Address.data.address });
 
+        Addressdispatch({ type: Addressactions.Feaching_success, payload: Address.data.address });
         setName(Address.data.address.name);
         setPinCode(Address.data.address.pinCode);
         setMobileNum(Address.data.address.mobileNumber);
@@ -237,43 +273,6 @@ export default function Checkout() {
         setAddressType(Address.data.address.addressType);
     }
 
-    useEffect(() => {
-
-        const getAddress = async () => {
-
-            try {
-
-                if (user) {
-
-                    const Address = await axios.get(`${Host}/api/user/address`, {
-                        headers: {
-                            'Authorization': `Bearer ${user.token}`
-                        }
-                    });
-
-                    Addressdispatch({ type: Addressactions.Feaching_success, payload: Address.data.address });
-
-                    setName(Address.data.address.name);
-                    setPinCode(Address.data.address.pinCode);
-                    setMobileNum(Address.data.address.mobileNumber);
-                    setLocality(Address.data.address.locality);
-                    setAreaStreat(Address.data.address.address);
-                    setCity(Address.data.address.city);
-                    setState(Address.data.address.state);
-                    setlandmark(Address.data.address.landmark);
-                    setAltmobile(Address.data.address.alterMobileNumber);
-                    setAddressType(Address.data.address.addressType);
-                }
-
-            } catch (error) {
-
-                console.log(error)
-            }
-        }
-
-        getAddress()
-
-    }, [user])
 
     const submiteOrder = async () => {
 

@@ -42,10 +42,23 @@ export default function ProductType() {
     return (
         <div>
             <Body>
+                {
+                    filterAbleProduct && !filterAbleProduct.length > 0 &&
+
+                    <div style={{ width: "100%" }}>
+                        <h3 style={{ margin: "10px auto", color: "red", textAlign: "center" }}>No Product to Show</h3>
+                    </div>
+                }
+
                 <WraperBox>
-                    <FilterSec>
-                        <Filter setFilterAbleProduct={setFilterAbleProduct} />
-                    </FilterSec>
+
+                    {
+                        filterAbleProduct && filterAbleProduct.length > 0 &&
+
+                        <FilterSec>
+                            <Filter setFilterAbleProduct={setFilterAbleProduct} />
+                        </FilterSec>
+                    }
                     <ProductSec>
                         {
                             filterAbleProduct && filterAbleProduct.length > 0 && filterAbleProduct.map((product) =>
