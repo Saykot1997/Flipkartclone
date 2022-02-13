@@ -3,10 +3,7 @@ const Router = express.Router();
 const Cart = require('../models/Cart-model');
 const authGurd = require('../authgurd/authGurd');
 
-
-
 // create cart
-
 Router.post('/cart/add', authGurd, async (req, res) => {
 
     const runUpdate = (condition, update) => {
@@ -66,16 +63,13 @@ Router.post('/cart/add', authGurd, async (req, res) => {
                 Promise.all(promiseAray)
                     .then(result => res.status(200).json(result))
                     .catch(err => res.status(400).json(err))
-
             })
-
 
         } else {
 
             const cart = await new Cart(cartObj).save()
             res.status(200).json(cart)
         }
-
 
     } catch (error) {
 
@@ -92,7 +86,6 @@ Router.get('/cart/getcarts', authGurd, async (req, res) => { //
     try {
 
         const cart = await Cart.findOne({ user: req.user_id }).populate('cartItems.product', '_id name price productPicture');
-
 
         let cartItems = [];
         cart.cartItems.forEach((item) => {
@@ -116,6 +109,7 @@ Router.get('/cart/getcarts', authGurd, async (req, res) => { //
 });
 
 
+// delete cart
 Router.post('/cart/delete', authGurd, async (req, res) => {
 
     const productId = req.body.productId;

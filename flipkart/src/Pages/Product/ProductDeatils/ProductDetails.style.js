@@ -53,7 +53,7 @@ export const PictureBox = styled.div`
     justify-content: center;
     align-items: center;
     div{
-        width: 75%;
+        width: 100%;
         height: 100%;
         overflow: hidden;
 

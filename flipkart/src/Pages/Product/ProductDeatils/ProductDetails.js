@@ -46,26 +46,33 @@ export default function ProductDetails(props) {
     }, []);
 
     const AddToCard = async (product) => {
+        try {
 
-        if (!user) {
+            if (!user) {
 
-            const { _id, name, price } = product;
-            const img = product.productPicture[0].img
-            const Card = {
-                _id,
-                name,
-                price,
-                img
-            }
+                const { _id, name, price } = product;
+                const img = product.productPicture[0].img
+                const Card = {
+                    _id,
+                    name,
+                    price,
+                    img
+                }
 
-            if (Cards.length > 0) {
+                if (Cards.length > 0) {
 
-                const curentItem = Cards.find((item) => (item._id === product._id));
+                    const curentItem = Cards.find((item) => (item._id === product._id));
 
-                if (curentItem) {
+                    if (curentItem) {
 
-                    curentItem["quantity"] = curentItem["quantity"] + 1
-                    Cardsdispatch({ type: Cardsactions.Feaching_success, payload: curentItem });
+                        curentItem["quantity"] = curentItem["quantity"] + 1
+                        Cardsdispatch({ type: Cardsactions.Feaching_success, payload: curentItem });
+
+                    } else {
+
+                        Card["quantity"] = 1;
+                        Cardsdispatch({ type: Cardsactions.Feaching_success, payload: Card })
+                    }
 
                 } else {
 
@@ -73,49 +80,46 @@ export default function ProductDetails(props) {
                     Cardsdispatch({ type: Cardsactions.Feaching_success, payload: Card })
                 }
 
+                history.replace("/card");
+
             } else {
 
-                Card["quantity"] = 1;
-                Cardsdispatch({ type: Cardsactions.Feaching_success, payload: Card })
-            }
+                const Card = {
+                    user_id: user._id,
+                    cartItems: [{
+                        product: product._id,
+                    }]
+                }
 
-            history.replace("/card");
+                if (Cards.length > 0) {
 
-        } else {
+                    const curentItem = Cards.find((item) => (item._id === product._id));
 
-            const Card = {
-                user_id: user._id,
-                cartItems: [{
-                    product: product._id,
-                }]
-            }
+                    if (curentItem) {
 
+                        Card.cartItems[0]["quantity"] = curentItem["quantity"] + 1
 
+                    } else {
 
-            if (Cards.length > 0) {
-
-                const curentItem = Cards.find((item) => (item._id == product._id));
-
-                if (curentItem) {
-
-                    Card.cartItems[0]["quantity"] = curentItem["quantity"] + 1
+                        Card.cartItems[0]["quantity"] = 1;
+                    }
 
                 } else {
 
                     Card.cartItems[0]["quantity"] = 1;
                 }
 
-            } else {
-
-                Card.cartItems[0]["quantity"] = 1;
+                await axios.post(`${Host}/api/cart/add`, Card, {
+                    headers: {
+                        "Authorization": `Bearer ${user.token}`
+                    }
+                });
+                history.replace("/card");
             }
 
-            const res = await axios.post(`${Host}/api/cart/add`, Card, {
-                headers: {
-                    "Authorization": `Bearer ${user.token}`
-                }
-            });
-            res && history.replace("/card");
+        } catch (error) {
+
+            console.log(error);
         }
 
     };

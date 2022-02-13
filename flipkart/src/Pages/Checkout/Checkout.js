@@ -99,81 +99,128 @@ export default function Checkout() {
                 setEmail("")
                 setPassword("");
                 const res = await axios.post(`${Host}/api/signin`, userObj);
-                Userdispatch({ type: Useractions.Feaching_success, payload: res.data })
+                Userdispatch({ type: Useractions.Feaching_success, payload: res.data });
+
+                if (res) {
+
+                    const localCards = JSON.parse(localStorage.getItem("Cards"));
+
+                    try {
+
+                        const cards = await axios.get(`${Host}/api/cart/getcarts`, {
+                            headers: {
+                                'Authorization': `Bearer ${res.data.token}`
+                            }
+                        });
+
+                        if (localCards.length > 0 && cards) {
+
+                            const cartItems = [];
+
+                            localCards.forEach(card => {
+
+                                const curentCart = cards.data.find((item) => item._id === card._id);
+
+                                if (curentCart) {
+
+                                    const updatedCart = {
+                                        product: curentCart._id,
+                                        quantity: parseInt(curentCart.quantity) + parseInt(card.quantity)
+                                    }
+
+                                    cartItems.push(updatedCart);
+
+                                } else {
+
+                                    const updatedCart = {
+                                        product: card._id,
+                                        quantity: card.quantity
+                                    }
+
+                                    cartItems.push(updatedCart)
+                                }
+                            });
+
+                            const Card = {
+                                cartItems: cartItems
+                            }
+
+                            const updateCarts = await axios.post(`${Host}/api/cart/add`, Card, {
+                                headers: {
+                                    "Authorization": `Bearer ${res.data.token}`
+                                }
+                            });
+
+                            if (updateCarts) {
+
+                                const allCarts = await axios.get(`${Host}/api/cart/getcarts`, {
+                                    headers: {
+                                        "Authorization": `Bearer ${res.data.token}`
+                                    }
+                                });
+                                Cardsdispatch({ type: Cardsactions.Reset, payload: allCarts.data })
+                            }
+
+                        } else {
+
+                            const allCarts = await axios.get(`${Host}/api/cart/getcarts`, {
+                                headers: {
+                                    "Authorization": `Bearer ${res.data.token}`
+                                }
+                            });
+                            Cardsdispatch({ type: Cardsactions.Reset, payload: allCarts.data })
+                        }
+
+                    } catch (error) {
+
+                        if (localCards.length > 0) {
+
+                            console.log("no cards")
+
+                            const cartItems = [];
+
+                            localCards.forEach(card => {
+
+                                const updatedCart = {
+                                    product: card._id,
+                                    quantity: card.quantity
+                                }
+
+                                cartItems.push(updatedCart)
+                            });
+
+                            const Card = {
+                                cartItems: cartItems
+                            }
+
+                            const updateCarts = await axios.post(`${Host}/api/cart/add`, Card, {
+                                headers: {
+                                    "Authorization": `Bearer ${res.data.token}`
+                                }
+                            });
+
+                            if (updateCarts) {
+
+                                const allCarts = await axios.get(`${Host}/api/cart/getcarts`, {
+                                    headers: {
+                                        "Authorization": `Bearer ${res.data.token}`
+                                    }
+                                });
+                                Cardsdispatch({ type: Cardsactions.Reset, payload: allCarts.data })
+                            }
+                        }
+                    }
+
+
+                }
 
             } catch (error) {
 
                 if (error.response.data === "authentication fail") {
 
                     window.alert("email or password is wrong");
-
                 }
-
                 console.log(error.response)
-            }
-
-            try {
-
-                const cards = await axios.get(`${Host}/api/cart/getcarts`, {
-                    headers: {
-                        'Authorization': `Bearer ${user.token}`
-                    }
-                });
-
-                const localCards = JSON.parse(localStorage.getItem("Cards"));
-
-                if (localCards.length > 0 && cards) {
-
-                    const cartItems = [];
-
-                    localCards.forEach(card => {
-
-                        const curentCart = cards.data.find((item) => item._id === card._id);
-
-                        if (curentCart) {
-
-                            const updatedCart = {
-                                product: curentCart._id,
-                                quantity: parseInt(curentCart.quantity) + parseInt(card.quantity)
-                            }
-
-                            cartItems.push(updatedCart);
-
-                        } else {
-
-                            const updatedCart = {
-                                product: card._id,
-                                quantity: card.quantity
-                            }
-
-                            cartItems.push(updatedCart)
-                        }
-
-                    });
-
-
-                    const Card = {
-
-                        cartItems: cartItems
-                    }
-
-                    const updateCarts = await axios.post(`${Host}/api/cart/add`, Card);
-
-                    if (updateCarts) {
-
-                        const allCarts = await axios.get(`${Host}/api/cart/getcarts`);
-                        Cardsdispatch({ type: Cardsactions.Reset, payload: allCarts.data })
-                    }
-
-                } else {
-
-                    const allCarts = await axios.get(`${Host}/api/cart/getcarts`);
-                    Cardsdispatch({ type: Cardsactions.Reset, payload: allCarts.data })
-                }
-
-            } catch (error) {
-
-                console.log(error)
             }
         }
     }
