@@ -32,7 +32,30 @@ function Signup() {
 
             } catch (error) {
 
-                window.alert("There is a probleme in creating the user.Tty diffrent informations.")
+                if (error.response.data === "Email is not valid") {
+
+                    window.alert("Email is not valid");
+
+                } else if (error.response.data === "firstName should be alphabetic") {
+
+                    window.alert("FirstName should be alphabetic");
+
+                } else if (error.response.data === "lastName should be alphabetic") {
+
+                    window.alert("LastName should be alphabetic");
+
+                } else if (error.response.data === "lowercase:1 upercase:1 number:1 symble:1 require minimus:8 carecter") {
+
+                    window.alert("Password should be 1 lowercase 1 upercase 1 number 1 symble and at least 8 characters");
+
+                } else if (error.response.data === "user alrady register") {
+
+                    window.alert("User already register");
+
+                } else {
+
+                    window.alert("Something went wrong");
+                }
             }
         } else {
 
