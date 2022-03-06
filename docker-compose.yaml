@@ -7,6 +7,7 @@ services:
     depends_on:
       - flipkart-clone-backend
       - mongo
+      - flipkart-clone-admin
   flipkart-clone-admin:
     build: ./admin
     ports:
@@ -22,7 +23,7 @@ services:
       - mongo
     environment:
       - TOKENSECRATE=lksdajlkjslkajklklsfakklsajkljakljflkjjlkajkljfjflklkksakfjdsafljkajskslsa
-      - DATABASE_URL=mongodb://mongo:27017/flipkart
+      - DATABASE_URL=mongodb://mongo:27017/flipkart-clone
   mongo:
     image: mongo
     restart: always

@@ -23,8 +23,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static('uploads'));
 
-// databess conection
-mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true }, () => { console.log("databess has been conected !") });
+// mongodb conection
+mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }, () => { console.log("databess has been conected !") });
 
 //Home route
 app.get('/', (req, res) => { res.status(200).json("hello") });
@@ -47,5 +47,5 @@ const PORT = process.env.PORT || 5000;
 // app host port
 
 app.listen(PORT, () => {
-    console.log("server is running");
+    console.log("server is running at port :5000");
 })

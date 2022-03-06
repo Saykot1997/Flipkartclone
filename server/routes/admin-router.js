@@ -42,11 +42,11 @@ Router.post('/admin/signin', async (req, res) => {
 //register route
 Router.post('/admin/signup', validationfunc, async (req, res) => {
 
-    const email = req.body.email;
+
 
     try {
 
-        const user = await User.findOne({ email })
+        const user = await User.findOne({ email: req.body.email });
 
         if (user) {
 
